@@ -1,0 +1,12 @@
+{
+  "name": "@apple-notes/config",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./tailwind": "./tailwind.config.ts"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

@@ -1,0 +1,15 @@
+node_modules/
+.next/
+dist/
+.env
+.env.local
+*.log
+*.tsbuildinfo
+.claude/
+.cursor/
+.opencode/
+.turbo
+coverage/
+playwright-report/
+test-results/
+*next-dev-pid.txt

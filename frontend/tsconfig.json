@@ -1,0 +1,33 @@
+{
+  "extends": "@apple-notes/config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@apple-notes/shared": [
+        "../packages/shared/src/index.ts"
+      ],
+      "@apple-notes/config/tailwind": [
+        "../packages/config/tailwind.config.ts"
+      ]
+    },
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "allowJs": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

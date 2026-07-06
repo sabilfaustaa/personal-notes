@@ -1,0 +1,244 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Apple Notes Design Tokens ────────────────────── */
+:root {
+  /* Golden Apple-yellow — used for active text, folder icons, accents */
+  --accent: #E5A50A;
+  --accent-strong: #C98A00;
+  --accent-icon: #F2B705;
+  /* Surfaces: folders pane (darker) · notes list (mid) · editor (white) */
+  --bg-app: #FFFFFF;
+  --bg-sidebar: #E7E7E9;
+  --bg-list: #F6F6F6;
+  --bg-elevated: #FFFFFF;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --text-tertiary: #A1A1A6;
+  --separator: #DCDCDF;
+  --separator-strong: #C9C9CE;
+  /* Soft yellow highlight for the selected note row & active folder */
+  --selection: #FCE7A1;
+  --selection-soft: #FBEFC9;
+  --hover: rgba(0, 0, 0, 0.045);
+  --field: rgba(0, 0, 0, 0.06);
+  --danger: #FF3B30;
+  --shadow-rgb: 0, 0, 0;
+}
+
+[data-theme="dark"],
+.dark {
+  --accent: #FFD426;
+  --accent-strong: #FFDE5C;
+  --accent-icon: #FFD426;
+  --bg-app: #1E1E1E;
+  --bg-sidebar: #242426;
+  --bg-list: #1C1C1E;
+  --bg-elevated: #2C2C2E;
+  --text-primary: #F5F5F7;
+  --text-secondary: #98989D;
+  --text-tertiary: #6E6E73;
+  --separator: #3A3A3C;
+  --separator-strong: #48484A;
+  --selection: #5C4E16;
+  --selection-soft: #38330F;
+  --hover: rgba(255, 255, 255, 0.06);
+  --field: rgba(255, 255, 255, 0.10);
+  --danger: #FF453A;
+  --shadow-rgb: 0, 0, 0;
+}
+
+/* ── Baseline ─────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-separator;
+  }
+  body {
+    @apply bg-bg-app text-text-primary font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ── Scrollbar (Apple-style: muncul saat hover) ──── */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(var(--shadow-rgb), 0.22);
+  background-clip: padding-box;
+}
+.dark *:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--shadow-rgb), 0.38) !important;
+  background-clip: padding-box;
+}
+
+/* Sembunyikan scrollbar (toolbar editor) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Selection ────────────────────────────────────── */
+::selection {
+  background: var(--selection);
+}
+
+/* ── Focus ring ───────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+/* ── Animasi ──────────────────────────────────────── */
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-slide-in { animation: slide-in 180ms cubic-bezier(.2,.8,.2,1); }
+.animate-fade-in { animation: fade-in 150ms ease-out; }
+.animate-pop-in { animation: pop-in 150ms cubic-bezier(.2,.8,.2,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Tiptap Editor Styles ─────────────────────────── */
+.ProseMirror {
+  outline: none;
+  min-height: 300px;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.ProseMirror p {
+  margin: 0;
+  padding: 1px 0;
+}
+.ProseMirror h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.ProseMirror h2 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.ProseMirror h3 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.ProseMirror ul, .ProseMirror ol {
+  padding-left: 24px;
+  margin: 4px 0;
+}
+.ProseMirror li {
+  margin: 2px 0;
+}
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.ProseMirror ul[data-type="taskList"] li label {
+  margin-top: 3px;
+}
+.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+.ProseMirror code {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.9em;
+  background: var(--separator);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.ProseMirror pre {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", ui-monospace, monospace;
+  font-size: 15px;
+  background: var(--bg-sidebar);
+  padding: 12px 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+}
+.ProseMirror blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  color: var(--text-secondary);
+  margin: 8px 0;
+}
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--separator);
+  margin: 16px 0;
+}
+.ProseMirror mark {
+  background: var(--selection);
+  color: inherit;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--text-secondary);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 8px 0;
+  display: block;
+}
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
