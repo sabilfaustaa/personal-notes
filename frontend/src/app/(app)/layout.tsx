@@ -8,6 +8,7 @@ import { Editor } from "@/components/Editor";
 import { SyncStatus } from "@/components/SyncStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PwaControls } from "@/components/PwaControls";
+import { TrafficLights } from "@/components/TrafficLights";
 import { seedIfNeeded } from "@/features/db";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { PanelLeft, X } from "lucide-react";
@@ -36,12 +37,10 @@ export default function AppLayout() {
           fixed lg:static inset-y-0 left-0 z-30
         `}
       >
-        {/* Title bar */}
-        <div className="h-[56px] flex-shrink-0 flex items-center justify-between pl-4 pr-2 select-none border-b border-separator/50">
-          <h2 className="font-bold text-[17px] text-text-primary tracking-[-0.01em]">
-            Folder
-          </h2>
-          <div className="flex items-center gap-1">
+        {/* Title bar — traffic lights macOS di kiri */}
+        <div className="h-[52px] flex-shrink-0 flex items-center justify-between pl-5 pr-2 select-none">
+          <TrafficLights />
+          <div className="flex items-center gap-0.5">
             <PwaControls />
             <ThemeToggle />
             <SyncStatus />
@@ -50,7 +49,7 @@ export default function AppLayout() {
               className="lg:hidden p-2 rounded-lg hover:bg-hover transition-colors"
               aria-label="Tutup sidebar"
             >
-              <X className="w-[18px] h-[18px] text-text-secondary" />
+              <X className="w-5 h-5 text-text-secondary" />
             </button>
           </div>
         </div>
@@ -80,7 +79,7 @@ export default function AppLayout() {
             className="flex items-center gap-2.5 text-accent font-semibold text-[15px]"
             aria-label="Toggle sidebar"
           >
-            <PanelLeft className="w-[18px] h-[18px]" />
+            <PanelLeft className="w-5 h-5" />
             <span>Folder</span>
           </button>
         </div>

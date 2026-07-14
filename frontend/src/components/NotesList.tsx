@@ -61,7 +61,7 @@ export function NotesList() {
             aria-label="Catatan baru"
             title="Catatan baru (Ctrl+N)"
           >
-            <SquarePen className="w-[20px] h-[20px]" />
+            <SquarePen className="w-[22px] h-[22px]" strokeWidth={1.9} />
           </button>
         )}
       </div>

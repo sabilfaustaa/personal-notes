@@ -29,7 +29,7 @@ export function ThemeToggle() {
       aria-label={`Tema: ${theme}`}
       title={`Tema: ${theme} — klik untuk ganti`}
     >
-      <Icon className="w-[18px] h-[18px] text-text-secondary" />
+      <Icon className="w-5 h-5 text-text-secondary" />
     </button>
   );
 }

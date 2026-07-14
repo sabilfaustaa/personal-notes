@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, Node, Extension } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
@@ -17,6 +17,73 @@ import { longDate, wordCount } from "@/lib/format";
 import { useEffect, useRef, useState } from "react";
 import { Lock, Pin, Trash2 } from "lucide-react";
 import type { JSONContent } from "@tiptap/react";
+
+/** Dokumen selalu diawali satu baris judul (H1); sisanya blok bebas. */
+const TitleDocument = Node.create({
+  name: "doc",
+  topNode: true,
+  content: "heading block*",
+});
+
+/** Enter di baris judul → pindah ke awal body, jangan pecah judul jadi dua. */
+const TitleEnter = Extension.create({
+  name: "titleEnter",
+  priority: 1000,
+  addKeyboardShortcuts() {
+    return {
+      Enter: ({ editor }) => {
+        const { state } = editor;
+        const { $from } = state.selection;
+        if ($from.depth < 1 || $from.index(0) !== 0) return false;
+        if ($from.node(1).type.name !== "heading") return false;
+        const titleEnd = state.doc.child(0).nodeSize;
+        if (state.doc.childCount === 1) {
+          return editor
+            .chain()
+            .insertContentAt(titleEnd, { type: "paragraph" })
+            .focus(titleEnd + 1)
+            .run();
+        }
+        return editor.chain().focus(titleEnd + 1).run();
+      },
+    };
+  },
+});
+
+/**
+ * Normalisasi dokumen lama agar cocok dengan skema "heading block*":
+ * blok pertama dipromosikan jadi baris judul H1.
+ */
+function toTitleDoc(json: JSONContent | null | undefined): JSONContent {
+  const content =
+    json && Array.isArray(json.content) && json.content.length > 0
+      ? [...(json.content as JSONContent[])]
+      : [{ type: "paragraph" } as JSONContent];
+
+  const [first, ...rest] = content as [JSONContent, ...JSONContent[]];
+
+  if (first.type === "heading") {
+    content[0] = { ...first, attrs: { ...first.attrs, level: 1 } };
+    return { type: "doc", content };
+  }
+
+  if (first.type === "paragraph") {
+    const inline = (first.content ?? []) as JSONContent[];
+    const brIdx = inline.findIndex((n) => n.type === "hardBreak");
+    const head = (brIdx === -1 ? inline : inline.slice(0, brIdx)).filter((n) => n.type === "text");
+    const tail = brIdx === -1 ? [] : inline.slice(brIdx + 1);
+    const title: JSONContent = {
+      type: "heading",
+      attrs: { level: 1 },
+      ...(head.length ? { content: head } : {}),
+    };
+    const body = tail.length ? [{ type: "paragraph", content: tail }, ...rest] : rest;
+    return { type: "doc", content: [title, ...body] };
+  }
+
+  // Blok pertama bukan teks (list, gambar, dsb) → sisipkan judul kosong di atasnya.
+  return { type: "doc", content: [{ type: "heading", attrs: { level: 1 } }, ...content] };
+}
 
 export function Editor() {
   const activeNoteId = useUIStore((s) => s.activeNoteId);
@@ -36,13 +103,29 @@ export function Editor() {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      TitleDocument,
+      TitleEnter,
+      StarterKit.configure({ document: false, heading: { levels: [1, 2, 3] } }),
       Underline,
       Highlight,
       TaskList,
       TaskItem.configure({ nested: true }),
       ImageExt.configure({ inline: false, allowBase64: true }),
-      Placeholder.configure({ placeholder: "Mulai menulis…" }),
+      Placeholder.configure({
+        showOnlyCurrent: false,
+        placeholder: ({ editor, node, pos }) => {
+          if (pos === 0 && node.type.name === "heading") return "Judul";
+          const doc = editor.state.doc;
+          if (
+            doc.childCount === 2 &&
+            node.type.name === "paragraph" &&
+            pos === doc.child(0).nodeSize
+          ) {
+            return "Mulai menulis…";
+          }
+          return "";
+        },
+      }),
     ],
     editorProps: { attributes: { class: "focus:outline-none min-h-[60vh]" } },
     content: "",
@@ -64,7 +147,8 @@ export function Editor() {
     if (!editor || !note || note.locked) return;
     if (loadedId.current === note.id) return;
     loadedId.current = note.id;
-    editor.commands.setContent((note.contentJson as JSONContent) ?? "");
+    editor.commands.setContent(toTitleDoc(note.contentJson as JSONContent));
+    if (!note.contentText) editor.commands.focus("start");
   }, [editor, note]);
 
   useEffect(() => {
@@ -117,14 +201,14 @@ export function Editor() {
       />
 
       {/* Toolbar + actions */}
-      <div className="flex items-stretch h-[56px] flex-shrink-0 border-b border-separator bg-bg-app sticky top-0 z-10">
+      <div className="flex items-stretch h-[52px] flex-shrink-0 border-b border-separator/70 bg-bg-app sticky top-0 z-10">
         <div className="flex-1 min-w-0 flex items-center">
           <FormatToolbar editor={editor} onInsertImage={() => fileInput.current?.click()} />
         </div>
         <div className="flex items-center gap-1 px-3">
           <button
             onClick={() => togglePin(note.id)}
-            className={`p-[7px] rounded-lg transition-colors cursor-pointer ${
+            className={`p-2 rounded-lg transition-colors cursor-pointer ${
               note.pinned
                 ? "text-accent"
                 : "text-text-secondary hover:bg-hover hover:text-text-primary"
@@ -132,34 +216,34 @@ export function Editor() {
             aria-label={note.pinned ? "Lepas Sematan" : "Sematkan"}
             title={note.pinned ? "Lepas Sematan" : "Sematkan"}
           >
-            <Pin className={`w-5 h-5 ${note.pinned ? "fill-accent rotate-45" : ""}`} />
+            <Pin className={`w-[21px] h-[21px] ${note.pinned ? "fill-accent rotate-45" : ""}`} />
           </button>
           <button
             onClick={() => setLockOpen(true)}
-            className="p-[7px] rounded-lg text-text-secondary hover:bg-hover hover:text-text-primary transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-text-secondary hover:bg-hover hover:text-text-primary transition-colors cursor-pointer"
             aria-label="Kunci catatan"
             title="Kunci catatan"
           >
-            <Lock className="w-5 h-5" />
+            <Lock className="w-[21px] h-[21px]" />
           </button>
           <button
             onClick={() => {
               deleteNote(note.id);
               setActiveNoteId(null);
             }}
-            className="p-[7px] rounded-lg text-text-secondary hover:bg-hover hover:text-danger transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-text-secondary hover:bg-hover hover:text-danger transition-colors cursor-pointer"
             aria-label="Hapus catatan"
             title="Hapus"
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="w-[21px] h-[21px]" />
           </button>
         </div>
       </div>
 
       {/* Konten */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[700px] mx-auto px-8 sm:px-12 lg:px-16 py-8">
-          <p className="text-text-secondary text-[13px] mb-6 text-center tabular-nums">
+        <div className="max-w-[720px] mx-auto px-8 sm:px-12 lg:px-16 py-7">
+          <p className="text-text-secondary text-[13px] mb-5 text-center tabular-nums">
             {longDate(note.updatedAt)}
           </p>
           <EditorContent editor={editor} />
@@ -167,7 +251,7 @@ export function Editor() {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-center px-8 h-[32px] flex-shrink-0 border-t border-separator">
+      <div className="flex items-center justify-center px-8 h-[32px] flex-shrink-0 border-t border-separator/70">
         <span className="text-text-secondary text-[12px] tabular-nums">
           {words} kata
         </span>

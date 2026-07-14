@@ -74,7 +74,8 @@ export function generateId(): string {
 }
 
 export function emptyDoc(): Record<string, unknown> {
-  return { type: "doc", content: [{ type: "paragraph" }] };
+  // Skema editor: baris pertama selalu judul (H1), sisanya body.
+  return { type: "doc", content: [{ type: "heading", attrs: { level: 1 } }] };
 }
 
 // ── Seed: jalankan sekali saat pertama buka ────────

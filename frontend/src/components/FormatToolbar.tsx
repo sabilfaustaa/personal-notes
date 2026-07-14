@@ -10,7 +10,6 @@ import {
   List,
   ListOrdered,
   ListChecks,
-  Heading1,
   Heading2,
   Heading3,
   Code,
@@ -25,6 +24,8 @@ interface FormatToolbarProps {
   editor: Editor | null;
   onInsertImage?: () => void;
 }
+
+const ICON = "w-5 h-5";
 
 function ToolbarButton({
   onClick,
@@ -48,11 +49,11 @@ function ToolbarButton({
       aria-pressed={active}
       title={label}
       className={`
-        p-[7px] rounded-md transition-colors duration-100 flex-shrink-0
+        p-2 rounded-lg transition-colors duration-100 flex-shrink-0
         ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
         ${
           active
-            ? "bg-accent/20 text-accent-strong"
+            ? "bg-accent/15 text-accent-strong"
             : "text-text-secondary hover:bg-hover hover:text-text-primary"
         }
       `}
@@ -63,7 +64,7 @@ function ToolbarButton({
 }
 
 function ToolbarDivider() {
-  return <div className="w-px h-6 bg-separator mx-1" />;
+  return <div className="w-px h-6 bg-separator mx-1.5 flex-shrink-0" />;
 }
 
 export function FormatToolbar({ editor, onInsertImage }: FormatToolbarProps) {
@@ -71,10 +72,10 @@ export function FormatToolbar({ editor, onInsertImage }: FormatToolbarProps) {
     return (
       <div className="flex items-center gap-1 px-3">
         <div className="flex items-center gap-1 opacity-40">
-          <Bold className="w-[18px] h-[18px]" />
-          <Italic className="w-[18px] h-[18px]" />
-          <UnderlineIcon className="w-[18px] h-[18px]" />
-          <Strikethrough className="w-[18px] h-[18px]" />
+          <Bold className={ICON} />
+          <Italic className={ICON} />
+          <UnderlineIcon className={ICON} />
+          <Strikethrough className={ICON} />
         </div>
       </div>
     );
@@ -87,13 +88,13 @@ export function FormatToolbar({ editor, onInsertImage }: FormatToolbarProps) {
         onClick={() => editor.chain().focus().undo().run()}
         label="Undo"
       >
-        <Undo2 className="w-[18px] h-[18px]" />
+        <Undo2 className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().redo().run()}
         label="Redo"
       >
-        <Redo2 className="w-[18px] h-[18px]" />
+        <Redo2 className={ICON} />
       </ToolbarButton>
 
       <ToolbarDivider />
@@ -104,60 +105,53 @@ export function FormatToolbar({ editor, onInsertImage }: FormatToolbarProps) {
         active={editor.isActive("bold")}
         label="Bold (Ctrl+B)"
       >
-        <Bold className="w-[18px] h-[18px]" />
+        <Bold className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         active={editor.isActive("italic")}
         label="Italic (Ctrl+I)"
       >
-        <Italic className="w-[18px] h-[18px]" />
+        <Italic className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         active={editor.isActive("underline")}
         label="Underline (Ctrl+U)"
       >
-        <UnderlineIcon className="w-[18px] h-[18px]" />
+        <UnderlineIcon className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         active={editor.isActive("strike")}
         label="Strikethrough"
       >
-        <Strikethrough className="w-[18px] h-[18px]" />
+        <Strikethrough className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHighlight().run()}
         active={editor.isActive("highlight")}
         label="Highlight"
       >
-        <Highlighter className="w-[18px] h-[18px]" />
+        <Highlighter className={ICON} />
       </ToolbarButton>
 
       <ToolbarDivider />
 
-      {/* Heading styles */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        active={editor.isActive("heading", { level: 1 })}
-        label="Title"
-      >
-        <Heading1 className="w-[18px] h-[18px]" />
-      </ToolbarButton>
+      {/* Heading (H1 khusus baris judul, tidak di toolbar) */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         active={editor.isActive("heading", { level: 2 })}
-        label="Heading"
+        label="Judul bagian"
       >
-        <Heading2 className="w-[18px] h-[18px]" />
+        <Heading2 className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         active={editor.isActive("heading", { level: 3 })}
-        label="Subheading"
+        label="Subjudul"
       >
-        <Heading3 className="w-[18px] h-[18px]" />
+        <Heading3 className={ICON} />
       </ToolbarButton>
 
       <ToolbarDivider />
@@ -166,23 +160,23 @@ export function FormatToolbar({ editor, onInsertImage }: FormatToolbarProps) {
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         active={editor.isActive("bulletList")}
-        label="Bullet list"
+        label="Daftar poin"
       >
-        <List className="w-[18px] h-[18px]" />
+        <List className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         active={editor.isActive("orderedList")}
-        label="Numbered list"
+        label="Daftar bernomor"
       >
-        <ListOrdered className="w-[18px] h-[18px]" />
+        <ListOrdered className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleTaskList().run()}
         active={editor.isActive("taskList")}
         label="Checklist"
       >
-        <ListChecks className="w-[18px] h-[18px]" />
+        <ListChecks className={ICON} />
       </ToolbarButton>
 
       <ToolbarDivider />
@@ -191,29 +185,29 @@ export function FormatToolbar({ editor, onInsertImage }: FormatToolbarProps) {
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         active={editor.isActive("blockquote")}
-        label="Block quote"
+        label="Kutipan"
       >
-        <Quote className="w-[18px] h-[18px]" />
+        <Quote className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         active={editor.isActive("codeBlock")}
-        label="Code block"
+        label="Blok kode"
       >
-        <Code className="w-[18px] h-[18px]" />
+        <Code className={ICON} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        label="Divider"
+        label="Garis pemisah"
       >
-        <Minus className="w-[18px] h-[18px]" />
+        <Minus className={ICON} />
       </ToolbarButton>
 
       <ToolbarDivider />
 
       {/* Gambar inline */}
       <ToolbarButton onClick={() => onInsertImage?.()} label="Sisipkan gambar">
-        <Image className="w-[18px] h-[18px]" />
+        <Image className={ICON} />
       </ToolbarButton>
     </div>
   );

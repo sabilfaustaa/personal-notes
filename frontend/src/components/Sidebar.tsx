@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useUIStore } from "@/lib/store";
 import { Folder, Trash2, Plus, Hash, Download, Upload, ChevronRight, Notebook } from "lucide-react";
@@ -60,11 +60,11 @@ export function Sidebar() {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <nav className="flex-1 overflow-y-auto px-2 pb-2" aria-label="Folder">
-        {/* ── iCloud section ──────────────────────── */}
+        {/* â”€â”€ iCloud section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <SectionLabel>iCloud</SectionLabel>
 
         <Item
-          icon={<Notebook className="w-[18px] h-[18px]" />}
+          icon={<Notebook className="w-5 h-5" />}
           label="Semua Catatan"
           count={counts.all}
           active={activeCollection === "all" && !activeFolderId && !activeTag}
@@ -90,7 +90,7 @@ export function Sidebar() {
               <ContextMenu.Trigger asChild>
                 <div>
                   <Item
-                    icon={<Folder className="w-[18px] h-[18px]" />}
+                    icon={<Folder className="w-5 h-5" />}
                     label={folder.name}
                     count={folder.count}
                     chevron
@@ -145,21 +145,21 @@ export function Sidebar() {
         )}
 
         <Item
-          icon={<Trash2 className="w-[18px] h-[18px]" />}
+          icon={<Trash2 className="w-5 h-5" />}
           label="Baru Dihapus"
           count={counts.deleted}
           active={activeCollection === "recently-deleted"}
           onClick={() => setActiveCollection("recently-deleted")}
         />
 
-        {/* ── Tags ───────────────────────────────── */}
+        {/* â”€â”€ Tags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {tags.length > 0 && (
           <>
             <SectionLabel>Tag</SectionLabel>
             {tags.map(({ tag, count }) => (
               <Item
                 key={tag}
-                icon={<Hash className="w-[18px] h-[18px]" />}
+                icon={<Hash className="w-5 h-5" />}
                 label={tag}
                 count={count}
                 active={activeTag === tag}
@@ -170,13 +170,13 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* ── Footer: New folder + backup ───────────── */}
+      {/* â”€â”€ Footer: New folder + backup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex-shrink-0 border-t border-separator">
         <button
           onClick={() => setCreating(true)}
           className="flex items-center gap-2.5 w-full px-4 h-[44px] text-[14px] text-accent-icon hover:text-accent font-medium transition-colors cursor-pointer"
         >
-          <Plus className="w-[18px] h-[18px]" strokeWidth={2.5} />
+          <Plus className="w-5 h-5" strokeWidth={2.5} />
           <span className="text-text-secondary group-hover:text-text-primary">Folder Baru</span>
         </button>
         <div className="flex items-center gap-1.5 px-3 pb-3">
@@ -189,14 +189,14 @@ export function Sidebar() {
             aria-hidden="true"
           />
           <FooterBtn onClick={() => exportBackup()} title="Ekspor semua catatan ke file JSON">
-            <Download className="w-[16px] h-[16px]" />
+            <Download className="w-[17px] h-[17px]" />
             Ekspor
           </FooterBtn>
           <FooterBtn
             onClick={() => fileInput.current?.click()}
             title="Impor catatan dari file JSON"
           >
-            <Upload className="w-[16px] h-[16px]" />
+            <Upload className="w-[17px] h-[17px]" />
             Impor
           </FooterBtn>
         </div>
