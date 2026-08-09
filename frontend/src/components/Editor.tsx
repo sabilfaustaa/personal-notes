@@ -17,6 +17,7 @@ import { longDate, wordCount } from "@/lib/format";
 import { useEffect, useRef, useState } from "react";
 import { Lock, Pin, Trash2 } from "lucide-react";
 import type { JSONContent } from "@tiptap/react";
+import { proseMirrorToClipboardText } from "@apple-notes/shared";
 
 /** Dokumen selalu diawali satu baris judul (H1); sisanya blok bebas. */
 const TitleDocument = Node.create({
@@ -127,7 +128,11 @@ export function Editor() {
         },
       }),
     ],
-    editorProps: { attributes: { class: "focus:outline-none min-h-[60vh]" } },
+    editorProps: {
+      attributes: { class: "focus:outline-none min-h-[60vh]" },
+      clipboardTextSerializer: (slice) =>
+        proseMirrorToClipboardText(slice.content.toJSON() as Record<string, unknown>[]),
+    },
     content: "",
     onUpdate: ({ editor }) => {
       if (!activeNoteId) return;

@@ -15,6 +15,7 @@ import {
   usePurgeNote,
 } from "@/hooks/useNotes";
 import { relativeDate, snippetFrom } from "@/lib/format";
+import { NOTE_DRAG_MIME } from "@/lib/noteDrag";
 
 export function NotesList() {
   const activeNoteId = useUIStore((s) => s.activeNoteId);
@@ -46,6 +47,11 @@ export function NotesList() {
         : "Semua Catatan";
 
   const total = notes?.length ?? 0;
+
+  function startNoteDrag(event: React.DragEvent<HTMLButtonElement>, noteId: string) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData(NOTE_DRAG_MIME, noteId);
+  }
 
   return (
     <div className="flex-1 flex flex-col min-h-0 relative">
@@ -93,6 +99,8 @@ export function NotesList() {
                     pinned={n.pinned}
                     active={activeNoteId === n.id}
                     locked={n.locked}
+                    draggable
+                    onDragStart={(event) => startNoteDrag(event, n.id)}
                     onClick={() => setActiveNoteId(n.id)}
                     onTogglePin={() => togglePin(n.id)}
                     onDelete={() => deleteNote(n.id)}
@@ -112,6 +120,8 @@ export function NotesList() {
                   active={activeNoteId === n.id}
                   locked={n.locked}
                   deleted={isDeletedView}
+                  draggable={!isDeletedView}
+                  onDragStart={(event) => startNoteDrag(event, n.id)}
                   onClick={() => setActiveNoteId(n.id)}
                   onTogglePin={() => togglePin(n.id)}
                   onDelete={() => deleteNote(n.id)}

@@ -16,6 +16,8 @@ interface NoteRowProps {
   onDelete?: () => void;
   onRestore?: () => void;
   onPurge?: () => void;
+  draggable?: boolean;
+  onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void;
 }
 
 export function NoteRow({
@@ -31,15 +33,20 @@ export function NoteRow({
   onDelete,
   onRestore,
   onPurge,
+  draggable = false,
+  onDragStart,
 }: NoteRowProps) {
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger asChild>
         <button
           onClick={onClick}
+          draggable={draggable}
+          onDragStart={onDragStart}
           aria-current={active ? "true" : undefined}
+          title={draggable ? "Tarik untuk memindahkan catatan ke folder" : undefined}
           className={`
-            relative w-full text-left rounded-xl cursor-pointer
+            relative w-full text-left rounded-xl ${draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}
             transition-colors duration-100
             ${active ? "bg-selection" : "hover:bg-hover"}
           `}

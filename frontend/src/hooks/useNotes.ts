@@ -159,6 +159,22 @@ export function usePurgeNote() {
   };
 }
 
+/** Pindahkan catatan aktif ke folder lain, atau ke All Notes bila `folderId` null. */
+export function useMoveNote() {
+  return async (noteId: string, folderId: string | null) => {
+    const note = await db.notes.get(noteId);
+    if (!note || note.deletedAt !== null || note.folderId === folderId) return false;
+
+    if (folderId !== null && !(await db.folders.get(folderId))) return false;
+
+    await db.notes.update(noteId, {
+      folderId,
+      updatedAt: new Date().toISOString(),
+    });
+    return true;
+  };
+}
+
 // ── Kunci catatan (enkripsi lokal) ─────────────────
 
 /** Kunci catatan: enkripsi contentJson dengan passcode, kosongkan teks biasa. */

@@ -2,7 +2,7 @@
 
 import { useUIStore } from "@/lib/store";
 import { Folder, Trash2, Plus, Hash, Download, Upload, ChevronRight, Notebook } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import {
   useFolders,
@@ -11,8 +11,10 @@ import {
   useCreateFolder,
   useRenameFolder,
   useDeleteFolder,
+  useMoveNote,
 } from "@/hooks/useNotes";
 import { exportBackup, importBackup } from "@/lib/backup";
+import { hasDraggedNote, NOTE_DRAG_MIME } from "@/lib/noteDrag";
 
 export function Sidebar() {
   const activeCollection = useUIStore((s) => s.activeCollection);
@@ -28,7 +30,19 @@ export function Sidebar() {
   const createFolder = useCreateFolder();
   const renameFolder = useRenameFolder();
   const deleteFolder = useDeleteFolder();
+  const moveNote = useMoveNote();
   const fileInput = useRef<HTMLInputElement>(null);
+  const [dropTarget, setDropTarget] = useState<string | "all" | null>(null);
+
+  useEffect(() => {
+    const clearDropTarget = () => setDropTarget(null);
+    window.addEventListener("dragend", clearDropTarget);
+    window.addEventListener("drop", clearDropTarget);
+    return () => {
+      window.removeEventListener("dragend", clearDropTarget);
+      window.removeEventListener("drop", clearDropTarget);
+    };
+  }, []);
 
   async function onImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -57,6 +71,21 @@ export function Sidebar() {
     setEditingId(null);
   }
 
+  function allowNoteDrop(event: React.DragEvent<HTMLButtonElement>, target: string | "all") {
+    if (!hasDraggedNote(Array.from(event.dataTransfer.types))) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setDropTarget(target);
+  }
+
+  async function dropNote(event: React.DragEvent<HTMLButtonElement>, folderId: string | null) {
+    if (!hasDraggedNote(Array.from(event.dataTransfer.types))) return;
+    event.preventDefault();
+    const noteId = event.dataTransfer.getData(NOTE_DRAG_MIME);
+    setDropTarget(null);
+    if (noteId) await moveNote(noteId, folderId);
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <nav className="flex-1 overflow-y-auto px-2 pb-2" aria-label="Folder">
@@ -69,6 +98,10 @@ export function Sidebar() {
           count={counts.all}
           active={activeCollection === "all" && !activeFolderId && !activeTag}
           onClick={() => setActiveCollection("all")}
+          dropActive={dropTarget === "all"}
+          onDragOver={(event) => allowNoteDrop(event, "all")}
+          onDragLeave={() => setDropTarget(null)}
+          onDrop={(event) => dropNote(event, null)}
         />
 
         {folders.map((folder) =>
@@ -96,6 +129,10 @@ export function Sidebar() {
                     chevron
                     active={activeFolderId === folder.id}
                     onClick={() => setActiveFolderId(folder.id)}
+                    dropActive={dropTarget === folder.id}
+                    onDragOver={(event) => allowNoteDrop(event, folder.id)}
+                    onDragLeave={() => setDropTarget(null)}
+                    onDrop={(event) => dropNote(event, folder.id)}
                   />
                 </div>
               </ContextMenu.Trigger>
@@ -242,6 +279,10 @@ function Item({
   active,
   chevron = false,
   onClick,
+  dropActive = false,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -249,15 +290,23 @@ function Item({
   active: boolean;
   chevron?: boolean;
   onClick: () => void;
+  dropActive?: boolean;
+  onDragOver?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onDragLeave?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onDrop?: (event: React.DragEvent<HTMLButtonElement>) => void;
 }) {
   return (
     <button
       onClick={onClick}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       aria-current={active ? "true" : undefined}
+      aria-label={dropActive ? `${label}, lepaskan untuk memindahkan catatan` : undefined}
       className={`
         group flex items-center gap-3 w-full pl-3 pr-2.5 py-[9px] my-[1px] rounded-lg text-[14px]
         transition-colors duration-100 cursor-pointer
-        ${active ? "bg-selection" : "hover:bg-hover"}
+        ${dropActive ? "bg-accent/20 ring-2 ring-inset ring-accent" : active ? "bg-selection" : "hover:bg-hover"}
       `}
     >
       <span className="text-accent-icon flex-shrink-0">{icon}</span>
